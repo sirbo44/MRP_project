@@ -1,12 +1,22 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.shortcuts import render, redirect
+from .models import User
+
+
 
 def to_login(request):
     return redirect('login')
 
 def login(request):
-    return render(request, "login.html")
+    if request.method == "POST":
+        user = User(request.POST)
+        if user.is_valid():
+            print(user.username)
+            print(user.password)
+        return redirect('/home')
+    else:
+        return render(request, "login.html")
 
 def home(request):
     context = {"page" : "home"}
