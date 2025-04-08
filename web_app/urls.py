@@ -11,5 +11,11 @@ urlpatterns = [
     path("archive", views.archive, name="archive"),
     path("forecasting", views.forecasting, name="forecasting"),
     path("report", views.report, name="report"),
+    path("estimate", views.estimate, name="estimate"),
+    path("estimation_schedule", views.estimation_schedule, name="estimation_schedule"),
+    # path("", views., name=""),
+    # path("", views., name=""),
+    # path("", views., name=""),
+    # path("", views., name=""),
     # path("", views., name=""),
 ]
