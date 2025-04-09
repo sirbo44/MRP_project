@@ -1,11 +1,11 @@
 {% extends './partials/base.html' %}
 {% block content%}
     <h3>Enter the needed pieces</h3>
-    <form action="/estimate" method="post">
+    <form action="/estimate" method="get">
       {% csrf_token %}
       <div>
-        <h5>Dependencies week 1</h5>
-        <input type="number" name="input">
+        <h5 id="week1">Dependencies week 1</h5>
+        <input type="number" name="input" value="0">
       </div></br>
       
       <div id="newitems">
@@ -26,11 +26,13 @@
       // Create an h5 tag
       const h5 = document.createElement('h5');
       h5.textContent = 'Dependencies week '+ week; // Text for the h5
+      h5.id = 'week'+ week;
       week += 1;
       // Create an input tag
       const input = document.createElement('input');
       input.type = 'number';
       input.name = 'input';
+      input.value = '0';
       // Append h5 and input to the new div
       newDiv.appendChild(h5);
       newDiv.appendChild(input);

@@ -1,11 +1,79 @@
 {% extends './partials/base.html'%}
 {% block content %}
-
+    <table>
+        <tr>
+            <th>Weeks</th>
+            {% for i in range %}
+                <td>{{ i }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Requirements</th>
+            <td>Inventory</td>
+            {% for i in data %}
+                <td>{{ i }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Deliverables</th>
+            {% for i in range %}
+                <td>test</td>
+            {% endfor %}
+        </tr>
+    </table>
+    <input type="checkbox" name="existing" id="checkbox">
+    <form action="/add_order" method="post">
+        {% csrf_token %}
+        <section id="section1" style="background-color: aqua;">
+            <label for="brand">Customer Name</label>
+            <input type="text" name="brand" id="brand" required>
+            <label for="date">Date of order</label>
+            <input type="date" name="date" id="date" required>
+            <label for="phone">Phone</label>
+            <input type="tel" name="phone" id="phone" required>
+            <label for="tin">TIN</label>
+            <input type="text" name="tin" id="tin" required>
+        </section>
+        <section id="section2" style="background-color: yellow;" >
+            <label for="tin">TIN</label>
+            <input type="text" name="tin" id="tin" disabled required>
+            <label for="date">Date of order</label>
+            <input type="date" name="date" id="date" disabled required>
+        </section>
+        
+        <button type="submit">Add order</button>
+        <button formaction="/estimation_period" formmethod="get">Cancel</button>
+    </form>
+    
 {% endblock %}
 
 
 {% block scripts %}
 <script>
-
+    function disableSection(id) {
+        const section = document.getElementById(id);
+        const inputs = section.querySelectorAll('input, select, textarea, button');
+        inputs.forEach(function(input) {
+            input.disabled = true;
+        });
+    }
+    function enableSection(id) {
+        const section = document.getElementById(id);
+        const inputs = section.querySelectorAll('input, select, textarea, button');
+        inputs.forEach(function(input) {
+            input.disabled = false;
+        });
+    }
+    const checkbox = document.getElementById('checkbox');
+    checkbox.addEventListener('change', () =>{
+        event.preventDefault();
+        if (checkbox.checked) {
+            disableSection('section1');
+            enableSection('section2');
+        } else {
+            disableSection('section2');
+            enableSection('section1');
+        }
+    });
 </script>
 {% endblock %}
