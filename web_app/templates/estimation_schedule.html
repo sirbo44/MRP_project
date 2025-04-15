@@ -21,6 +21,7 @@
             {% endfor %}
         </tr>
     </table>
+    <label for="existing">Existing customer</label>
     <input type="checkbox" name="existing" id="checkbox">
     <form action="/add_order" method="post">
         {% csrf_token %}

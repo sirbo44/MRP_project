@@ -74,7 +74,7 @@ def add_order(request):
             new_customer = Customer(brand=request.POST['brand'], tin=request.POST['tin'], phone=request.POST['phone'])
             new_customer.save()
         # create the order for
-        new_order = Order(customer=request.POST['tin'],date=request.POST['date'],schedule='test')
+        new_order = Order(customer=request.POST['tin'],date=request.POST['date'],schedule='test')   # get the orders per week and add them to schedule variable
         new_order.save()
     return redirect('estimation_period')
 
