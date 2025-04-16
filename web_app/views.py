@@ -96,12 +96,10 @@ def track_order(request):
 
 def monitor(request):
     orderID = request.GET.get('order')
-    print(orderID)
     order = Order.objects.filter(id = orderID).values()[0]
     data = order['schedule']
     data = data[1:-1]
     data = data.split(',')
-    print(data)
     context = {"page": "monitor", "data": data, 'range': range(len(data)+1), "id": order['id']}
     return render(request, "monitor.html", context)
 
