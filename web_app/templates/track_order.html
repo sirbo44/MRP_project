@@ -1,1 +1,27 @@
 {% extends './partials/base.html'%}
+{% block content %} 
+    <table>
+        <tr>
+            <th>TIN</th>
+            <th>Date of Order</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.customer }}</td>
+            <td>{{ order.date }}</td>
+            <td>{{ order.id }}</td>
+            <td><a href="monitor/?order={{order.id}}">
+                <button type="button">Monitor</button>
+            </a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+{% endblock %}

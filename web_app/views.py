@@ -52,36 +52,58 @@ def estimate(request):                                                          
     # pass the values in the URL
     return redirect('estimation_schedule/?data=['+values+']')
 
-def estimation_schedule(request):
-    # get the values from the URL
-    data = request.GET.get('data', [])
-    # remove '[', ']' and the last ',' from the data retrieved from the URL
-    data = data.replace('[', '')
-    data = data.replace(']', '')
-    data = data[:-1]
-    # convert the data to a list 
-    data = data.split(',')
-    print(data)
-    context = {"page" : "estimation schedule", "data":data, 'range' :range(len(data)+1)}
-    return render(request, "estimation_schedule.html", context)
+path = ''
 
-def add_order(request):
+def estimation_schedule(request):
+    if request.method == 'GET':
+        # access global variable path
+        global path
+        # get the values from the URL
+        data = request.GET.get('data', [])
+        # remove '[', ']' and the last ',' from the data retrieved from the URL
+        data = data[1:-1]
+        # convert the data to a list 
+        data = data.split(',')
+        # remove the last empty item
+        data = data[:-1]
+        context = {"page" : "estimation schedule", "data":data, 'range' :range(len(data)+1)}
+        # modify the global variable path
+        path = request.get_full_path()
+        return render(request, "estimation_schedule.html", context)
     if request.method == 'POST':
+        # get the parameters from the url
+        params = path[path.find("=")+1:]
+        # delete the last ','
+        params = params[:-2]+params[-1]
+
         # in case of new customer 
-        # print(request.POST)                   TO BE DELETED
         if 'phone' in request.POST:
             # create a customer in the database
             new_customer = Customer(brand=request.POST['brand'], tin=request.POST['tin'], phone=request.POST['phone'])
             new_customer.save()
         # create the order for
-        new_order = Order(customer=request.POST['tin'],date=request.POST['date'],schedule='test')   # get the orders per week and add them to schedule variable
+        new_order = Order(customer=request.POST['tin'],date=request.POST['date'],schedule=params)   
         new_order.save()
     return redirect('estimation_period')
+      
 
 # -------------------------------TRACK ORDERS PAGES -----------------------------------------------
 def track_order(request):
-    context = {"page" : "track order"}
+    orders = Order.objects.all().values()
+    context = {"page" : "track order", 'orders':orders}
     return render(request, "track_order.html", context)
+
+
+def monitor(request):
+    orderID = request.GET.get('order')
+    print(orderID)
+    order = Order.objects.filter(id = orderID).values()[0]
+    data = order['schedule']
+    data = data[1:-1]
+    data = data.split(',')
+    print(data)
+    context = {"page": "monitor", "data": data, 'range': range(len(data)+1), "id": order['id']}
+    return render(request, "monitor.html", context)
 
 # --------------------------------ARCHIVE PAGES ----------------------------------------------
 def archive(request):

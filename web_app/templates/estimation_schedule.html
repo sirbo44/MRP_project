@@ -23,7 +23,7 @@
     </table>
     <label for="existing">Existing customer</label>
     <input type="checkbox" name="existing" id="checkbox">
-    <form action="/add_order" method="post">
+    <form action="/estimation_schedule/" method="post">
         {% csrf_token %}
         <section id="section1" style="background-color: aqua;">
             <label for="brand">Customer Name</label>
@@ -43,7 +43,7 @@
         </section>
         
         <button type="submit">Add order</button>
-        <button formaction="/estimation_period" formmethod="get">Cancel</button>
+        <button formaction="/estimation_schedule/" formmethod="get">Cancel</button>
     </form>
     
 {% endblock %}
