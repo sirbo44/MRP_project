@@ -22,12 +22,6 @@
             {% endfor %}
         </tr>
     </table>
-    <p>{{order}}</p>
-    <form action="archive" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="order" id="order" value='{{order.id}}'>        
-        <button>Archive</button>
-    </form>
 {% endblock %}
 
 

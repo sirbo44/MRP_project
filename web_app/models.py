@@ -14,3 +14,9 @@ class Order(models.Model):
     customer = models.CharField(max_length=255)
     date = models.CharField(max_length=12)
     schedule = models.CharField(max_length=300)
+
+class Archive(models.Model):
+    id = models.CharField(max_length=16,primary_key=True)
+    customer = models.CharField(max_length=255)
+    date = models.CharField(max_length=12)
+    schedule = models.CharField(max_length=300)

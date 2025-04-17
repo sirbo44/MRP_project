@@ -1,7 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.shortcuts import render, redirect
-from .models import User, Order, Customer
+from .models import User, Order, Customer, Archive
+import json
 
 
 # --------------------------REDIRECT TO LOGIN ----------------------------------------------------
@@ -100,13 +101,28 @@ def monitor(request):
     data = order['schedule']
     data = data[1:-1]
     data = data.split(',')
-    context = {"page": "monitor", "data": data, 'range': range(len(data)+1), "id": order['id']}
+    context = {"page": "monitor", "data": data, 'range': range(len(data)+1), 'order':order}
     return render(request, "monitor.html", context)
 
+
 # --------------------------------ARCHIVE PAGES ----------------------------------------------
+
 def archive(request):
-    context = {"page" : "archive"}
-    return render(request, "archive.html", context)
+    if request.method == 'POST':
+        orderid = int(request.POST.get('order'))
+        oldOrder = Order.objects.filter(id = orderid).values()[0]
+        newOrder = Archive(id=oldOrder['id'], customer=oldOrder['customer'], date=oldOrder['date'], schedule=oldOrder['schedule'])
+        newOrder.save()
+        oldOrder = Order.objects.get(id=orderid).delete()
+        return redirect('track_order')
+    if request.method == 'GET':
+        orders = Archive.objects.all()
+        context = {"page" : "archive", 'orders':orders}
+        return render(request, "archive.html", context)
+
+def schedule(request):
+    context = {"page": "schedule"}
+    return render(request, "schedule.html", context)
 
 # ---------------------------------FIRECASTING PAGES ---------------------------------------------
 def forecasting(request):

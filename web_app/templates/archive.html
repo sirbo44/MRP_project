@@ -1,7 +1,21 @@
 {% extends './partials/base.html'%}
 
 {% block content %} 
-
+    <table>
+        <tr>
+            <th>TIN</th>
+            <th>Date of Order</th>
+        </tr>
+        {% for order in orders %}       <!-- TRY IMPLEMENTATION WITH DIVS AS TABLE 
+                                                SOURCE MR. MAVROS' ENTERPRISE SYSTEM DEVELOPMENT IN GITHUB 
+                                                FILE target/classes/templates/homePage.html -->
+        <a href="/schedule?order={{order.id}}">
+            <td>{{ order.customer }}</td>
+            <td>{{ order.date }}</td>
+            <td>{{ order.id }}</td>
+        </a>
+        {% endfor %}
+    </table>
 {% endblock %}
 
 
