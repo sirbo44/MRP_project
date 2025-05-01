@@ -27,7 +27,9 @@
         {% csrf_token %}
         <input type="hidden" name="order" id="order" value='{{order.id}}'>        
         <button>Archive</button>
+        <button formaction="track_order" formmethod="get">Cancel</button>
     </form>
+
 {% endblock %}
 
 

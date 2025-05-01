@@ -126,7 +126,16 @@ def schedule(request):
 
 # ---------------------------------FIRECASTING PAGES ---------------------------------------------
 def forecasting(request):
-    context = {"page" : "forecasting"}
+    # We get all the archived records from the database in order to perform predictions
+    orders = Archive.objects.all()
+    date_val = {}
+    for i in range(len(orders)):
+        if (str(orders[i].date).split('-')[1] in date_val):
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] += int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+        else:
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+    print(date_val)
+    context = {"page" : "forecasting", "orders": orders, 'data':date_val}
     return render(request, "forecasting.html", context)
 
 # ----------------------------------REPORT PAGES --------------------------------------------
