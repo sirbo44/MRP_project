@@ -170,4 +170,19 @@ def report(request):
     context = {"page" : "report"}
     return render(request, "report.html", context)
 
-# ------------------------------------------------------------------------------
+# ----------------------------------CUSTOMERS --------------------------------------------
+def customers(request):
+    customers = Customer.objects.all()
+    context = {"page": "customers", "customers":customers}
+    return render(request, "customers.html", context)
+
+def edit(request):
+    tin = request.GET.get('tin')
+    customer = Customer.objects.get(tin=tin)
+    if request.method == 'POST':
+        customer.brand = request.POST.get('brand')
+        customer.phone = request.POST.get('phone')
+        customer.save()
+        return redirect('customers')
+    context = {"page":"edit page", "customer":customer}
+    return render(request, "edit.html", context)

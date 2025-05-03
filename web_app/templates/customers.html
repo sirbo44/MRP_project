@@ -1,0 +1,22 @@
+{% extends './partials/base.html'%}
+{% block content  %}
+<table>
+    <tr>
+        <th>Brand</th>
+        <th>TIN</th>
+        <th>Phone</th>
+    </tr>
+    {% for customer in customers %}
+    <tr>
+        <td>{{customer.brand}}</td>
+        <td>{{customer.tin}}</td>
+        <td>{{customer.phone}}</td>
+        <td><a href="/edit?tin={{customer.tin}}">Edit</a></td>
+    </tr>
+    {% endfor %}
+</table>
+<p>{{ customers.brand }}</p>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

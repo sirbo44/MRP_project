@@ -1,0 +1,19 @@
+{% extends './partials/base.html'%}
+{% block content  %}
+<form method="POST">
+    {% csrf_token %}
+    <label for="brand">Brand:</label>
+    <input type="text" id="brand" name="brand" value="{{ customer.brand }}"><br><br>
+  
+    <label for="tin">TIN:</label>
+    <input type="text" id="tin" name="tin" value="{{ customer.tin }}" readonly><br><br>
+  
+    <label for="phone">Phone:</label>
+    <input type="text" id="phone" name="phone" value="{{ customer.phone }}" ><br><br>
+
+    <button type="submit">Update</button>
+  </form>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
