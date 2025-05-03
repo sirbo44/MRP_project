@@ -1,0 +1,98 @@
+{% extends './partials/base.html'%}
+{% block content %} 
+{{ data|json_script:'data' }}
+<ul class="nav justify-content-center">
+    <li class="nav-item">
+        <a class="nav-link" href="/forecasting/linear_regression">Linear Regression</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/forecasting/exponential_smoothing">Exponential Smoothing</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/forecasting/moving_average">Moving Average</a>
+    </li>
+</ul>
+<input type="number" placeholder="1" id="periods" disabled>
+<label for="periods">Enter the number of periods for forecasting</label>
+<div id="scatter_chart" style="width: 800px; height: 500px;"></div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    const data = JSON.parse(document.getElementById('data').textContent);
+    google.charts.load('current', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+    periods = document.getElementById('periods');
+    periods.addEventListener('change', () => {
+
+        google.charts.setOnLoadCallback(drawChart(parseInt(periods.value)));
+    })
+    
+    
+
+    function drawChart(per_num = 1) {
+        const alpha = 0.7;  // Smoothing factor (can be made dynamic)
+        const months = Object.keys(data);
+        const values = Object.values(data);
+
+        // 1. Initialize smoothed values
+        let smoothed = [values[0]];
+        for (let i = 1; i < values.length; i++) {
+            const s = alpha * values[i] + (1 - alpha) * smoothed[i - 1];
+            smoothed.push(s);
+        }
+
+        // 2. Forecast future points using last smoothed value
+        const extraMonths = [];
+        const extraValues = [];
+        let lastForecast = smoothed[smoothed.length - 1];
+        let lastMonth = parseInt(months[months.length - 1].slice(-2));
+        let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+
+        for (let i = 1; i <= per_num; i++) {
+            // lastForecast = alpha * lastForecast + (1 - alpha) * lastForecast;  // Which simplifies to: same as lastForecast
+            extraValues.push(lastForecast);
+
+            if (lastMonth < 12) {
+            lastMonth += 1;
+            } else {
+            lastMonth = 1;
+            lastYear += 1;
+            }
+            extraMonths.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+        }
+
+        // 3. Build chart data
+        const chartData = [['Month', 'Actual Data', 'Forecast', 'Bridge']];
+        months.forEach((month, i) => {
+            const bridgeValue = i === months.length - 1 ? smoothed[i] : null;
+            chartData.push([month, values[i], null, bridgeValue]);
+        });
+
+        extraMonths.forEach((month, i) => {
+            const bridgeValue = i === 0 ? extraValues[i] : null;
+            chartData.push([month, null, extraValues[i], bridgeValue]);
+        });
+
+        const dataTable = google.visualization.arrayToDataTable(chartData);
+        const options = {
+            hAxis: { title: 'Month' },
+            vAxis: { title: 'Value' },
+            legend: 'bottom',
+            series: {
+            0: { color: '#4285F4', lineWidth: 2 },
+            1: { color: '#FF9800', lineWidth: 2, lineDashStyle: [4, 4] },
+            2: { color: '#FF9800', lineWidth: 2, lineDashStyle: [2, 4], visibleInLegend: false }
+            },
+            pointSize: 6
+        };
+
+        const chart = new google.visualization.LineChart(document.getElementById('scatter_chart'));
+        chart.draw(dataTable, options);
+        }
+
+</script>
+{% endblock %}

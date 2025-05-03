@@ -124,9 +124,9 @@ def schedule(request):
     context = {"page": "schedule"}
     return render(request, "schedule.html", context)
 
-# ---------------------------------FIRECASTING PAGES ---------------------------------------------
-def forecasting(request):
-    # We get all the archived records from the database in order to perform predictions
+# ---------------------------------FORECASTING PAGES ---------------------------------------------
+
+def linear_regression(request):
     orders = Archive.objects.all()
     date_val = {}
     for i in range(len(orders)):
@@ -136,7 +136,34 @@ def forecasting(request):
             date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
     print(date_val)
     context = {"page" : "forecasting", "orders": orders, 'data':date_val}
-    return render(request, "forecasting.html", context)
+    return render(request, "linear_regression.html", context)
+
+
+def exponential_smoothing(request):
+    orders = Archive.objects.all()
+    date_val = {}
+    for i in range(len(orders)):
+        if (str(orders[i].date).split('-')[1] in date_val):
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] += int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+        else:
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+    print(date_val)
+    context = {"page" : "exponential smoothing", "orders": orders, 'data':date_val}
+    return render(request, "exponential_smoothing.html", context)
+
+
+def moving_average(request):
+    # We get all the archived records from the database in order to perform predictions
+    orders = Archive.objects.all()
+    date_val = {}
+    for i in range(len(orders)):
+        if (str(orders[i].date).split('-')[1] in date_val):
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] += int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+        else:
+            date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
+    print(date_val)
+    context = {"page" : "moving average", "orders": orders, 'data':date_val}
+    return render(request, "moving_average.html", context)
 
 # ----------------------------------REPORT PAGES --------------------------------------------
 def report(request):
