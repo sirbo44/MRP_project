@@ -55,7 +55,7 @@ def estimate(request):                                                          
 
 path = ''
 
-def estimation_schedule(request):
+def estimation_schedule(request):                                                                       # DONE
     if request.method == 'GET':
         # access global variable path
         global path
@@ -89,13 +89,13 @@ def estimation_schedule(request):
       
 
 # -------------------------------TRACK ORDERS PAGES -----------------------------------------------
-def track_order(request):
+def track_order(request):                                                                               # DONE
     orders = Order.objects.all().values()
     context = {"page" : "track order", 'orders':orders}
     return render(request, "track_order.html", context)
 
 
-def monitor(request):
+def monitor(request):                                                                                   # DONE
     orderID = request.GET.get('order')
     order = Order.objects.filter(id = orderID).values()[0]
     data = order['schedule']
@@ -107,7 +107,7 @@ def monitor(request):
 
 # --------------------------------ARCHIVE PAGES ----------------------------------------------
 
-def archive(request):
+def archive(request):                                                                                   # DONE
     if request.method == 'POST':
         orderid = int(request.POST.get('order'))
         oldOrder = Order.objects.filter(id = orderid).values()[0]
@@ -120,13 +120,13 @@ def archive(request):
         context = {"page" : "archive", 'orders':orders}
         return render(request, "archive.html", context)
 
-def schedule(request):
+def schedule(request):                                                                                  # DONE
     context = {"page": "schedule"}
     return render(request, "schedule.html", context)
 
 # ---------------------------------FORECASTING PAGES ---------------------------------------------
 
-def linear_regression(request):
+def linear_regression(request):                                                                         # DONE
     orders = Archive.objects.all()
     date_val = {}
     for i in range(len(orders)):
@@ -139,7 +139,7 @@ def linear_regression(request):
     return render(request, "linear_regression.html", context)
 
 
-def exponential_smoothing(request):
+def exponential_smoothing(request):                                                                     # DONE
     orders = Archive.objects.all()
     date_val = {}
     for i in range(len(orders)):
@@ -152,7 +152,7 @@ def exponential_smoothing(request):
     return render(request, "exponential_smoothing.html", context)
 
 
-def moving_average(request):
+def moving_average(request):                                                                            # DONE
     # We get all the archived records from the database in order to perform predictions
     orders = Archive.objects.all()
     date_val = {}
@@ -166,17 +166,20 @@ def moving_average(request):
     return render(request, "moving_average.html", context)
 
 # ----------------------------------REPORT PAGES --------------------------------------------
-def report(request):
-    context = {"page" : "report"}
+def report(request): 
+    customers = Customer.objects.all().values()
+    orders = Order.objects.all().values()
+    archive = Archive.objects.all().values()    
+    context = {"page" : "report", "customers": list(customers), "orders": list(orders), "archive": list(archive)}
     return render(request, "report.html", context)
 
 # ----------------------------------CUSTOMERS --------------------------------------------
-def customers(request):
+def customers(request):                                                                                 # DONE
     customers = Customer.objects.all()
     context = {"page": "customers", "customers":customers}
     return render(request, "customers.html", context)
 
-def edit(request):
+def edit(request):                                                                                      # DONE
     tin = request.GET.get('tin')
     customer = Customer.objects.get(tin=tin)
     if request.method == 'POST':

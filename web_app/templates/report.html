@@ -1,10 +1,154 @@
 {% extends './partials/base.html'%}
-{% block content %} 
+{% block content %}
+{{ customers|json_script:"customers-data" }}
+{{ orders|json_script:'orders-data' }}
+{{ archive|json_script:'archive-data' }}
+<style>
+    .menu {
+      margin-bottom: 20px;
+    }
+    .menu button {
+      margin-right: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    .section input {
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
+  
+    <div class="menu">
+        <button onclick="displaySection('customers')">Customers</button>
+        <button onclick="displaySection('forecasting')">Forecasting</button>
+        <button onclick="displaySection('order')">Orders</button>
+        <button onclick="displaySection('all')">All</button>
+    </div>
 
+    <div id="customers" class="section">
+        <button onclick="myFunction('customers')">Download Customers</button>
+    </div>
+
+    <div id="forecasting" class="section">
+        <input type="date" placeholder="Enter from date" name="from" id="from">
+        <input type="date" placeholder="Enter to date" name="to" id="to">
+        <button onclick="myFunction('forecasting')">Download Forecasting</button>
+    </div>
+
+    <div id="order" class="section">
+        <input type="date" placeholder="Enter from date" name="from" id="from_order">
+        <input type="date" placeholder="Enter to date" name="to" id="to_order">
+        <button onclick="myFunction('order')">Download Order</button>
+    </div>
+
+    <div id="all" class="section">
+        <button onclick="myFunction('all')">Download General Report</button>
+    </div>
 {% endblock %}
 
 
 
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+    function displaySection(id) {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(section => section.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    console.log(JSON.parse(document.getElementById('archive-data').textContent)[0]['date']);
+    console.log();
 
+
+
+    async function myFunction(section){
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        // Title 
+        // pdf.text('Test text '+message, 10, 10);
+        const img = await loadImageAsBase64('/static/images/yellow.png');
+        pdf.addImage(await loadImageAsBase64('/static/images/yellow.png'), 'PNG', 10, 10, 75, 50);
+        pdf.text('Brand', 140, 27);
+        pdf.text(new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 130, 37);
+        
+        if (section == 'forecasting'){
+            title = 'Forecasting report';
+            pos = [82,80]
+        } 
+        if (section == 'customers'){
+            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 75, 0, 1, 250);     
+            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 135, 0, 1, 250);
+            title = 'Customers report';
+            pos = [82,80]
+            let cmers = JSON.parse(document.getElementById('customers-data').textContent);
+            pdf.text('Brand', 30, 100);
+            pdf.text('TIN', 98, 100);
+            pdf.text('Phone', 156, 100);
+            let top = 110;
+            for (let i=0; i<cmers.length; i++){
+                pdf.text(cmers[i]['brand'], 15, top);
+                pdf.text(cmers[i]['tin'], 75, top);
+                pdf.text(cmers[i]['phone'], 135, top);
+                pdf.addImage('/static/images/black.png', 15, top+0.7, 180, 0.3);
+                top += 10;
+            }
+        } 
+        if (section == 'order'){
+            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 100, 0, 1, 250);
+            title = 'Orders report';
+            pos = [83,80]
+            orders = JSON.parse(document.getElementById('archive-data').textContent).concat(JSON.parse(document.getElementById('orders-data').textContent));
+            from_date = document.getElementById('from_order').value;
+            to_date = document.getElementById('to_order').value;
+            final_orders = []
+            for (let i=0; i<orders.length; i++){
+                if (orders[i]['date']>= from_date && orders[i]['date']<=to_date){
+                    final_orders.push(orders[i]);
+                }
+            }
+            final_orders.sort((a,b) => a.date.localeCompare(b.date));
+            pdf.text('Customer',45,100);
+            pdf.text('Date',148,100);
+            let top = 110;
+            for (let i=0; i<final_orders.length; i++){
+                pdf.text(final_orders[i]['customer'], 20, top);
+                pdf.text(final_orders[i]['date'], 140, top);
+                pdf.addImage('/static/images/black.png', 15, top+0.7, 180, 0.3);
+                top += 10;
+            }
+        }
+        if (section == 'all'){
+                title = 'General report';
+                pos = [82,80]
+                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 75, 0, 1, 250);     
+                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 135, 0, 1, 250);
+                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 100, 0, 1, 250);
+
+        }
+        
+        
+        pdf.text(title, pos[0], pos[1])
+        // pdf.addImage(await loadImageAsBase64('/static/images/green.png'), 'PNG', 15, 100, 180, 100);
+        //0-100
+        
+        pdf.save('testPDF.pdf');
+    }
+    async function loadImageAsBase64(url) {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+    
+</script>
 {% endblock %}
