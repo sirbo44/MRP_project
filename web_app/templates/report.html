@@ -48,7 +48,10 @@
     </div>
 
     <div id="all" class="section">
-        <button onclick="myFunction('all')">Download General Report</button>
+      <input type="date" placeholder="Enter from date" name="from" id="from_all">
+      <input type="date" placeholder="Enter to date" name="to" id="to_all">
+      <!-- <button onclick="myFunction('all')">Download General Report</button> -->
+      <button onclick="myFunction('all')">Download</button>
     </div>
 {% endblock %}
 
@@ -69,86 +72,120 @@
 
 
     async function myFunction(section){
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        // Title 
-        // pdf.text('Test text '+message, 10, 10);
-        const img = await loadImageAsBase64('/static/images/yellow.png');
-        pdf.addImage(await loadImageAsBase64('/static/images/yellow.png'), 'PNG', 10, 10, 75, 50);
-        pdf.text('Brand', 140, 27);
-        pdf.text(new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 130, 37);
-        
-        if (section == 'forecasting'){
-            title = 'Forecasting report';
-            pos = [82,80]
-        } 
-        if (section == 'customers'){
-            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 75, 0, 1, 250);     
-            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 135, 0, 1, 250);
-            title = 'Customers report';
-            pos = [82,80]
-            let cmers = JSON.parse(document.getElementById('customers-data').textContent);
-            pdf.text('Brand', 30, 100);
-            pdf.text('TIN', 98, 100);
-            pdf.text('Phone', 156, 100);
-            let top = 110;
-            for (let i=0; i<cmers.length; i++){
-                pdf.text(cmers[i]['brand'], 15, top);
-                pdf.text(cmers[i]['tin'], 75, top);
-                pdf.text(cmers[i]['phone'], 135, top);
-                pdf.addImage('/static/images/black.png', 15, top+0.7, 180, 0.3);
-                top += 10;
-            }
-        } 
-        if (section == 'order'){
-            pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 100, 0, 1, 250);
-            title = 'Orders report';
-            pos = [83,80]
-            orders = JSON.parse(document.getElementById('archive-data').textContent).concat(JSON.parse(document.getElementById('orders-data').textContent));
-            from_date = document.getElementById('from_order').value;
-            to_date = document.getElementById('to_order').value;
-            final_orders = []
-            for (let i=0; i<orders.length; i++){
-                if (orders[i]['date']>= from_date && orders[i]['date']<=to_date){
-                    final_orders.push(orders[i]);
-                }
-            }
-            final_orders.sort((a,b) => a.date.localeCompare(b.date));
-            pdf.text('Customer',45,100);
-            pdf.text('Date',148,100);
-            let top = 110;
-            for (let i=0; i<final_orders.length; i++){
-                pdf.text(final_orders[i]['customer'], 20, top);
-                pdf.text(final_orders[i]['date'], 140, top);
-                pdf.addImage('/static/images/black.png', 15, top+0.7, 180, 0.3);
-                top += 10;
-            }
-        }
-        if (section == 'all'){
-                title = 'General report';
-                pos = [82,80]
-                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 75, 0, 1, 250);     
-                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 135, 0, 1, 250);
-                pdf.addImage(await loadImageAsBase64('/static/images/black.png'), 'PNG', 100, 0, 1, 250);
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-        }
-        
-        
-        pdf.text(title, pos[0], pos[1])
-        // pdf.addImage(await loadImageAsBase64('/static/images/green.png'), 'PNG', 15, 100, 180, 100);
-        //0-100
-        
-        pdf.save('testPDF.pdf');
-    }
-    async function loadImageAsBase64(url) {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-    }
-    
+      // Header section
+      doc.setFontSize(12);
+      doc.rect(10, 10, 30, 20);  // Placeholder for logo
+      doc.text("LOGO", 15, 22);
+      const cmers = JSON.parse(document.getElementById('customers-data').textContent);
+      const orders = JSON.parse(document.getElementById('archive-data').textContent).concat(JSON.parse(document.getElementById('orders-data').textContent));
+      doc.setFontSize(14);
+      doc.text("Your Company Name", 150, 15, { align: "right" });
+      doc.setFontSize(10);
+      doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 150, 22, { align: "right" });
+      let y = 40;
+      doc.setFontSize(12);
+      switch (section){
+        case 'customers':
+          doc.text("Customers", 14, y);
+          y += 4;
+          doc.autoTable({
+            head: [['Brand', 'TIN', 'Phone']],
+            body: cmers.map(c => [c.brand, c.tin, c.phone]),
+            y: y,
+            theme: 'striped',
+            margin: { top: y },
+            styles: { fontSize: 10 },
+            didDrawPage: function (data) {
+              if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(14);
+                doc.text("Your Company Name", 150, 15, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + getCurrentDateFormatted(), 150, 22, { align: "right" });
+                doc.rect(10, 10, 30, 20);
+                doc.text("LOGO", 15, 22);
+              }
+            }
+          });
+          break;
+        case 'orders':
+          from_date = document.getElementById('from_order').value;
+          to_date = document.getElementById('to_order').value;
+          final_orders = []
+          for (let i=0; i<orders.length; i++){
+              if (orders[i]['date']>= from_date && orders[i]['date']<=to_date){
+                  final_orders.push(orders[i]);
+              }
+          }
+          final_orders.sort((a,b) => a.date.localeCompare(b.date));
+          doc.text("Orders", 14, y);
+          y += 4;
+          doc.autoTable({
+            head: [['Customer', 'Date']],
+            body: final_orders.map(o => [o.customer, o.date]),
+            y: y,
+            theme: 'striped',
+            margin: { top: y },
+            styles: { fontSize: 10 },
+            didDrawPage: function (data) {
+              if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(14);
+                doc.text("Your Company Name", 150, 15, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + getCurrentDateFormatted(), 150, 22, { align: "right" });
+                doc.rect(10, 10, 30, 20);
+                doc.text("LOGO", 15, 22);
+              }
+            }
+          });
+          break;
+        case 'forecasting':
+          break;
+        case 'all':
+          doc.text("Orders", 14, y);
+          y += 4;
+          from_date = document.getElementById('from_all').value;
+          to_date = document.getElementById('to_all').value;
+          final_orders = []
+          for (let i=0; i<orders.length; i++){
+              if (orders[i]['date']>= from_date && orders[i]['date']<=to_date){
+                  final_orders.push(orders[i]);
+              }
+          }
+          final_orders.sort((a,b) => a.date.localeCompare(b.date));
+          doc.autoTable({
+            head: [['Customer', 'Date']],
+            body: final_orders.map(o => [o.customer, o.date]),
+            y: y,
+            theme: 'striped',
+            margin: { top: y },
+            styles: { fontSize: 10 },
+            didDrawPage: function (data) {
+              if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(14);
+                doc.text("Your Company Name", 150, 15, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + getCurrentDateFormatted(), 150, 22, { align: "right" });
+                doc.rect(10, 10, 30, 20);
+                doc.text("LOGO", 15, 22);
+              }
+            }
+          });
+          y += final_orders.length*11;
+          doc.text("Customers", 14, y);
+          y += 4;
+          doc.autoTable({
+            head: [['Brand', 'TIN', 'Phone']],
+            body: cmers.map(c => [c.brand, c.tin, c.phone]),
+            y: y,
+            theme: 'striped'
+          });
+          
+          break;
+      }
+      doc.save("company_report.pdf");
+    };
 </script>
 {% endblock %}
