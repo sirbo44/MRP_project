@@ -189,3 +189,62 @@ def edit(request):                                                              
         return redirect('customers')
     context = {"page":"edit page", "customer":customer}
     return render(request, "edit.html", context)
+
+
+
+
+
+'''         NOTES FOR IMPLEMENTATION
+
+ADD LOGO + BRAND TO THE EXPORTABLES
+
+track_order
+    1. place in the center
+    2. borders
+    3. in a container
+    4. monitor in the container
+    5. button steel blue and white letters border as estimation period steel blue
+
+monitor
+    1. in a container
+    2. archive steel blue white letters + borders
+    3. cancel danger red white letters + borders
+    4. order +id navy in the container
+
+archive 
+    1. display vertically
+    2. container in the center 
+    4. Archive title navy on top in the container
+    3. each line to be a link for monitor?
+
+forecasting(S)
+    1. shadows below links 
+    2. darker shadow on selected link
+    3. zoomed letters of selected link
+    4. title "Forecasting" navy above the links 
+    5. switch the field with label
+    6. center the graph and the label+field
+
+customers
+    1. container in the center 
+    2. title in navy "Customers"
+    3. table with borders 
+    4. make whole line edit button
+
+edit
+    1. container in the center
+    2. title "edit customer" navy
+    3. update = steel blue + borders white letters
+    4. cancel button danger red !!! CREATE IT 
+
+report 
+    1. create labels for dates 
+    2. the 4 buttons + fields + download in a container in the center 
+    3. main buttons white letters, steel blue + borders
+    4. change download => download general
+    5. download button white letters, steel blue + borders
+
+
+        GOOD TO HAVE 
+    live clock on the top left corner
+'''

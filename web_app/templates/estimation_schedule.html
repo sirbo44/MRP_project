@@ -1,5 +1,104 @@
 {% extends './partials/base.html'%}
 {% block content %}
+<style>
+    .container {
+      position: relative;
+      min-width: 300px;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 60px 10px 10px; /* top padding leaves space for fixed title */
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+      margin-top:5rem;
+    }
+
+    .container h2 {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      margin-left: 8.5rem;
+    }
+
+    .container table {
+      flex: 1 1 100px;
+      background: transparent;
+      padding: 10px;
+      text-align: center;
+    }
+    table{
+        margin: auto;
+        margin-top: 1rem;
+    }
+    table, th, td {
+      border: 1px solid #0B1E3D;
+      border-collapse: collapse; /* ensures borders don’t double up */
+      padding: 8px;
+    }
+    .title{
+        margin: auto;
+        color: #0B1E3D;
+    }
+    .existing{
+        margin-top: 1rem;
+        margin-left: 55rem;
+        margin-bottom: 1rem;
+    }
+    .section-container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      width: 300px;
+    }
+
+    .section-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 40px; /* space between the containers */
+      flex-wrap: wrap; /* make it responsive */
+    }
+
+    .section-container label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .section-container input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+    .add-button{
+        background-color: #4682B4;
+        margin-left: 52.5rem;
+        color: white;
+        border: 0.5rem solid #4682B4;
+    }
+    .cancel-button{
+        background-color: #FF6B35;
+        margin-left: 2rem;
+        color: white;
+        border: 0.5rem solid #FF6B35;
+    }
+    .add-button, .cancel-button{
+        margin-top:2rem;
+        font-size: 1.2rem;
+    }
+    #section1{
+        background-color: #00CED1;
+    }
+    #section2{
+        background-color: #FFB200;
+    }
+</style>
+<div class="container">
+    <h2 class="title">Estimation Schedule</h2>
     <table>
         <tr>
             <th>Weeks</th>
@@ -21,33 +120,61 @@
             {% endfor %}
         </tr>
     </table>
-    <label for="existing">Existing customer</label>
-    <input type="checkbox" name="existing" id="checkbox">
+</div>
+    <!-- <table>
+        <tr>
+            <th>Weeks</th>
+            {% for i in range %}
+                <td>{{ i }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Requirements</th>
+            <td>Inventory</td>
+            {% for i in data %}
+                <td>{{ i }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Deliverables</th>
+            {% for i in range %}
+                <td>test</td>
+            {% endfor %}
+        </tr>
+    </table> -->
+    <div class="existing">
+        <label for="existing">Existing customer</label>
+        <input type="checkbox" name="existing" id="checkbox">
+    </div>
+    <!-- <label for="existing">Existing customer</label>
+    <input type="checkbox" name="existing" id="checkbox"> -->
     <form action="/estimation_schedule/" method="post">
         {% csrf_token %}
-        <section id="section1" style="background-color: aqua;">
-            <label for="brand">Customer Name</label>
-            <input type="text" name="brand" id="brand" required>
-            <label for="date">Date of order</label>
-            <input type="date" name="date" id="date" required>
-            <label for="phone">Phone</label>
-            <input type="tel" name="phone" id="phone" required>
-            <label for="tin">TIN</label>
-            <input type="text" name="tin" id="tin" required>
-        </section>
-        <section id="section2" style="background-color: yellow;" >
-            <label for="tin">TIN</label>
-            <input type="text" name="tin" id="tin" disabled required>
-            <label for="date">Date of order</label>
-            <input type="date" name="date" id="date" disabled required>
-        </section>
-        
-        <button type="submit">Add order</button>
+        <div class="section-wrapper">
+            <section id="section1" class="section-container">
+                <label for="brand">Customer Name</label>
+                <input type="text" name="brand" id="brand" required>
+                <label for="date">Date of order</label>
+                <input type="date" name="date" id="date" required>
+                <label for="phone">Phone</label>
+                <input type="tel" name="phone" id="phone" required>
+                <label for="tin">TIN</label>
+                <input type="text" name="tin" id="tin" required>
+            </section>
+            <section id="section2" class="section-container" >
+                <label for="tin">TIN</label>
+                <input type="text" name="tin" id="tin" disabled required>
+                <label for="date">Date of order</label>
+                <input type="date" name="date" id="date" disabled required>
+            </section>
+        </div>
+        <button type="submit" class="add-button">Add order</button>
+        <button formaction="/estimation_period" formmethod="GET" class="cancel-button" id="cancel">Cancel</button>
     </form>
 
-    <form action="/estimation_period" method="get">
-        <button>Cancel</button>
-    </form>
+    <!-- <form action="/estimation_period" method="get">
+        <button class="cancel-button">Cancel</button>
+    </form> -->
     
 {% endblock %}
 
@@ -79,5 +206,10 @@
             enableSection('section1');
         }
     });
+    const cancelBtn = document.getElementById('cancel');
+    cancelBtn.addEventListener('click', () => {
+        window.location.href = '/estimation_period';
+    form.reset(); // optional
+  });
 </script>
 {% endblock %}
