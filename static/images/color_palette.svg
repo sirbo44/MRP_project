@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900">
+  <style>
+    .color-name { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; }
+    .hex-code { font-family: 'Courier New', monospace; font-size: 12px; }
+    .usage { font-family: Arial, sans-serif; font-size: 11px; font-style: italic; }
+    .light-text { fill: #F8F9FA; }
+    .dark-text { fill: #0A0A0A; }
+    .container { filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3)); }
+  </style>
+  
+  <rect width="100%" height="100%" fill="#1E1E2E" />
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24px" font-weight="bold" fill="#F8F9FA" text-anchor="middle">Tech UI Color Palette</text>
+  
+  <!-- Row 1 -->
+  <g class="container" transform="translate(40, 80)">
+    <rect width="220" height="120" rx="10" fill="#00BFFF" />
+    <text x="20" y="30" class="color-name dark-text">Electric Blue</text>
+    <text x="20" y="50" class="hex-code dark-text">#00BFFF</text>
+    <text x="20" y="80" class="usage dark-text">Primary accent/logo highlight</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 80)">
+    <rect width="220" height="120" rx="10" fill="#0A0A0A" />
+    <text x="20" y="30" class="color-name light-text">Midnight Black</text>
+    <text x="20" y="50" class="hex-code light-text">#0A0A0A</text>
+    <text x="20" y="80" class="usage light-text">Main background</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 80)">
+    <rect width="220" height="120" rx="10" fill="#1E1E2E" />
+    <text x="20" y="30" class="color-name light-text">Slate Gray</text>
+    <text x="20" y="50" class="hex-code light-text">#1E1E2E</text>
+    <text x="20" y="80" class="usage light-text">Cards/panels</text>
+  </g>
+  
+  <!-- Row 2 -->
+  <g class="container" transform="translate(40, 220)">
+    <rect width="220" height="120" rx="10" fill="#2D2D3A" />
+    <text x="20" y="30" class="color-name light-text">Charcoal</text>
+    <text x="20" y="50" class="hex-code light-text">#2D2D3A</text>
+    <text x="20" y="80" class="usage light-text">Sidebar/nav background</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 220)">
+    <rect width="220" height="120" rx="10" fill="#4682B4" />
+    <text x="20" y="30" class="color-name light-text">Steel Blue</text>
+    <text x="20" y="50" class="hex-code light-text">#4682B4</text>
+    <text x="20" y="80" class="usage light-text">Secondary buttons/links</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 220)">
+    <rect width="220" height="120" rx="10" fill="#10F0FF" />
+    <text x="20" y="30" class="color-name dark-text">Cyan Glow</text>
+    <text x="20" y="50" class="hex-code dark-text">#10F0FF</text>
+    <text x="20" y="80" class="usage dark-text">Hover glow/effect accents</text>
+  </g>
+  
+  <!-- Row 3 -->
+  <g class="container" transform="translate(40, 360)">
+    <rect width="220" height="120" rx="10" fill="#3B3B4F" />
+    <text x="20" y="30" class="color-name light-text">Graphite</text>
+    <text x="20" y="50" class="hex-code light-text">#3B3B4F</text>
+    <text x="20" y="80" class="usage light-text">Borders/dividers</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 360)">
+    <rect width="220" height="120" rx="10" fill="#F8F9FA" />
+    <text x="20" y="30" class="color-name dark-text">Ice White</text>
+    <text x="20" y="50" class="hex-code dark-text">#F8F9FA</text>
+    <text x="20" y="80" class="usage dark-text">Light text/background contrast</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 360)">
+    <rect width="220" height="120" rx="10" fill="#B0B6C2" />
+    <text x="20" y="30" class="color-name dark-text">Titanium</text>
+    <text x="20" y="50" class="hex-code dark-text">#B0B6C2</text>
+    <text x="20" y="80" class="usage dark-text">Placeholder/input fields</text>
+  </g>
+  
+  <!-- Row 4 -->
+  <g class="container" transform="translate(40, 500)">
+    <rect width="220" height="120" rx="10" fill="#39FF14" />
+    <text x="20" y="30" class="color-name dark-text">Neon Green</text>
+    <text x="20" y="50" class="hex-code dark-text">#39FF14</text>
+    <text x="20" y="80" class="usage dark-text">Success state/confirmation</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 500)">
+    <rect width="220" height="120" rx="10" fill="#FF4C4C" />
+    <text x="20" y="30" class="color-name dark-text">Danger Red</text>
+    <text x="20" y="50" class="hex-code dark-text">#FF4C4C</text>
+    <text x="20" y="80" class="usage dark-text">Errors/alerts</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 500)">
+    <rect width="220" height="120" rx="10" fill="#FFB200" />
+    <text x="20" y="30" class="color-name dark-text">Warning Amber</text>
+    <text x="20" y="50" class="hex-code dark-text">#FFB200</text>
+    <text x="20" y="80" class="usage dark-text">Warnings</text>
+  </g>
+  
+  <!-- Row 5 -->
+  <g class="container" transform="translate(40, 640)">
+    <rect width="220" height="120" rx="10" fill="#A259FF" />
+    <text x="20" y="30" class="color-name light-text">Accent Purple</text>
+    <text x="20" y="50" class="hex-code light-text">#A259FF</text>
+    <text x="20" y="80" class="usage light-text">Call-to-action hover</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 640)">
+    <rect width="220" height="120" rx="10" fill="#00CED1" />
+    <text x="20" y="30" class="color-name dark-text">Cool Teal</text>
+    <text x="20" y="50" class="hex-code dark-text">#00CED1</text>
+    <text x="20" y="80" class="usage dark-text">Info cards or tabs</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 640)">
+    <rect width="220" height="120" rx="10" fill="#8A2BE2" />
+    <text x="20" y="30" class="color-name light-text">Electric Violet</text>
+    <text x="20" y="50" class="hex-code light-text">#8A2BE2</text>
+    <text x="20" y="80" class="usage light-text">Alternative CTA</text>
+  </g>
+  
+  <!-- Row 6 -->
+  <g class="container" transform="translate(40, 780)">
+    <rect width="220" height="120" rx="10" fill="#DFF6FF" />
+    <text x="20" y="30" class="color-name dark-text">Frost Blue</text>
+    <text x="20" y="50" class="hex-code dark-text">#DFF6FF</text>
+    <text x="20" y="80" class="usage dark-text">Input field backgrounds</text>
+  </g>
+  
+  <g class="container" transform="translate(290, 780)">
+    <rect width="220" height="120" rx="10" fill="#0B1E3D" />
+    <text x="20" y="30" class="color-name light-text">Shadow Navy</text>
+    <text x="20" y="50" class="hex-code light-text">#0B1E3D</text>
+    <text x="20" y="80" class="usage light-text">Modal overlays/depth</text>
+  </g>
+  
+  <g class="container" transform="translate(540, 780)">
+    <rect width="220" height="120" rx="10" fill="#FF6B35" />
+    <text x="20" y="30" class="color-name dark-text">Rust Orange</text>
+    <text x="20" y="50" class="hex-code dark-text">#FF6B35</text>
+    <text x="20" y="80" class="usage dark-text">Onboarding pop/highlights</text>
+  </g>
+</svg>

@@ -36,8 +36,8 @@
     </div>
 
     <div id="forecasting" class="section">
-        <input type="date" placeholder="Enter from date" name="from" id="from">
-        <input type="date" placeholder="Enter to date" name="to" id="to">
+        <input type="date" placeholder="Enter from date" name="from" id="from_forecasting">
+        <input type="date" placeholder="Enter to date" name="to" id="to_forecasting">
         <button onclick="myFunction('forecasting')">Download Forecasting</button>
     </div>
 
@@ -110,7 +110,9 @@
             }
           });
           break;
-        case 'orders':
+        case 'order':
+          doc.text("Orders", 14, y);
+          y += 4;
           from_date = document.getElementById('from_order').value;
           to_date = document.getElementById('to_order').value;
           final_orders = []
@@ -120,8 +122,6 @@
               }
           }
           final_orders.sort((a,b) => a.date.localeCompare(b.date));
-          doc.text("Orders", 14, y);
-          y += 4;
           doc.autoTable({
             head: [['Customer', 'Date']],
             body: final_orders.map(o => [o.customer, o.date]),
@@ -144,6 +144,7 @@
         case 'forecasting':
           break;
         case 'all':
+          // orders 
           doc.text("Orders", 14, y);
           y += 4;
           from_date = document.getElementById('from_all').value;
@@ -173,16 +174,14 @@
               }
             }
           });
-          y += final_orders.length*11;
+          y += final_orders.length*9.5;
           doc.text("Customers", 14, y);
-          y += 4;
           doc.autoTable({
             head: [['Brand', 'TIN', 'Phone']],
             body: cmers.map(c => [c.brand, c.tin, c.phone]),
             y: y,
             theme: 'striped'
           });
-          
           break;
       }
       doc.save("company_report.pdf");

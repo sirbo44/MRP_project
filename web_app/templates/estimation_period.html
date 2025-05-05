@@ -1,21 +1,91 @@
 {% extends './partials/base.html' %}
 {% block content%}
+<style>
+  
+  .container {
+    margin-top:5rem;
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .item {
+    background-color: #e3f2fd;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  .item1{
+    margin-bottom:-1rem;
+  }
+  .button-container {
+      display: flex;
+      justify-content: space-between;  /* Align buttons on the same line */
+      gap: 10px;  /* Space between buttons */
+      margin-top: 20px;
+    }
+  .add-btn {
+    display: inline-block;
+    width: 45%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .estimate-btn {
+    display: inline-block;
+    width: 45%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .add-btn:hover,.estimate-btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+<body>
+
+  <div class="container">
     <h3>Enter the needed pieces</h3>
     <form action="/estimate" method="get">
       {% csrf_token %}
-      <div>
-        <h5 id="week1">Dependencies week 1</h5>
-        <input type="number" name="input" value="0">
+      <div class='item-list'>
+        <div class="item item1">
+          <h5 id="week1" >Dependencies week 1</h5>
+          <input type="number" name="input" value="0">
+        </div>
+        <div id="newitems" class='item'>
+        </div>
       </div></br>
       
-      <div id="newitems">
-      </div>
-    
-      <button id="createDivButton" ><i class="fa-solid fa-plus"></i></button>
-      <button type="submit">Estimate</button>
-    </form>
-{% endblock %}
       
+      <div class="button-container">
+        <button id="createDivButton" class='add-btn'><i class="fa-solid fa-plus"></i></button>
+        <button type="submit" id="createDivButton" class='estimate-btn'>Estimate</button>
+      </div>
+      
+    </form>
+  </div>
+{% endblock %}
+
 {% block scripts %}
 <script>
   week = 2

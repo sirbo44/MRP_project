@@ -53,7 +53,7 @@
         const extraValues = []
         for (let i=1; i<=per_num; i++){
             temp_List = values.concat(extraValues);
-            let newValue = (temp_List.at(-1)+temp_List.at(-2)+temp_List.at(-3))/3;
+            let newValue = (temp_List.at(-1)+temp_List.at(-2)+temp_List.at(-3))/per_num;
             extraValues.push(newValue);
         }
         const chartData = [
