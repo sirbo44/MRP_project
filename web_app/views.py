@@ -243,7 +243,7 @@ edit                OK
     3. update = steel blue + borders white letters
     4. cancel button danger red !!! CREATE IT 
 
-report 
+report              OK
     1. create labels for dates 
     2. the 4 buttons + fields + download in a container in the center 
     3. main buttons white letters, steel blue + borders

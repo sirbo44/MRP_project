@@ -23,13 +23,15 @@
       margin-bottom: 10px;
     }
     .container {
-            text-align: center;
-            width: 100%;
-            background-color: #F8F9FA;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-      }
+      margin-top: 5rem;
+      text-align: center;
+      width: 100%;
+      height: 12rem;
+      background-color: #F8F9FA;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
       .date-range {
         display: flex;
         align-items: center;
@@ -41,6 +43,16 @@
         justify-content: center; /* Center horizontally */
         align-items: center;     /* Center vertically */
       }
+      .section button{
+        margin-top:1rem;
+      }
+      /* .chart_div {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 800px;
+        height: 400px;
+      } */
 </style>
 <div class="container">
     <div class="menu">
@@ -90,7 +102,10 @@
     
     <button onclick="myFunction('all')">Download General</button>
   </div>
+  
+  <div class="chart_div" style="width: 800px; height: 400px;"></div>
 </div>
+
     
 {% endblock %}
 
@@ -99,16 +114,16 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script>
+    
     function displaySection(id) {
       const sections = document.querySelectorAll('.section');
       sections.forEach(section => section.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
-    console.log(JSON.parse(document.getElementById('archive-data').textContent)[0]['date']);
     console.log();
-
-
 
     async function myFunction(section){
       const { jsPDF } = window.jspdf;
@@ -116,15 +131,14 @@
 
       // Header section
       doc.setFontSize(12);
-      doc.rect(10, 10, 30, 20);  // Placeholder for logo
-      doc.text("LOGO", 15, 22);
+      doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
       const cmers = JSON.parse(document.getElementById('customers-data').textContent);
       const orders = JSON.parse(document.getElementById('archive-data').textContent).concat(JSON.parse(document.getElementById('orders-data').textContent));
       doc.setFontSize(14);
-      doc.text("Your Company Name", 150, 15, { align: "right" });
+      doc.text("PyTrack Inc.", 170, 25, { align: "right" });
       doc.setFontSize(10);
-      doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 150, 22, { align: "right" });
-      let y = 40;
+      doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+      let y = 50;
       doc.setFontSize(12);
       switch (section){
         case 'customers':
@@ -181,6 +195,12 @@
           });
           break;
         case 'forecasting':
+          doc.text("Forecasting", 14, y);
+          y += 4;
+          // remove the dated from and to 
+          // make charts as in the forecasting pages
+          // store them in png files
+          // add them in the pdf
           break;
         case 'all':
           // orders 
@@ -213,7 +233,7 @@
               }
             }
           });
-          y += final_orders.length*9.5;
+          y += final_orders.length*9;
           doc.text("Customers", 14, y);
           doc.autoTable({
             head: [['Brand', 'TIN', 'Phone']],
@@ -225,5 +245,6 @@
       }
       doc.save("company_report.pdf");
     };
+
 </script>
 {% endblock %}
