@@ -1,9 +1,45 @@
 {% extends './partials/base.html'%}
 {% block content %} 
+<style>
+    .container {
+        margin-top: 5rem;
+        background-color: #fff;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        text-align: center;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    table, th, td{
+        border: 0.1rem solid #4682B4;
+    }
+
+    th, td {
+        padding: 10px 15px;
+        text-align: center;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+    button{
+        background-color: #4682B4;
+        border: 0.7 solid #4682B4;
+        color: white;
+    }
+</style>
+<div class="container">
     <table>
         <tr>
             <th>TIN</th>
             <th>Date of Order</th>
+            <th>ID</th>
         </tr>
         {% for order in orders %}
         <tr>
@@ -16,6 +52,8 @@
         </tr>
         {% endfor %}
     </table>
+</div>
+    
     
 
 {% endblock %}

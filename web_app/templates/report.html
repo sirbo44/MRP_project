@@ -22,37 +22,76 @@
       display: block;
       margin-bottom: 10px;
     }
-  </style>
-  
+    .container {
+            text-align: center;
+            width: 100%;
+            background-color: #F8F9FA;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+      }
+      .date-range {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .center-container {
+        /* height: 100vh; Full screen height */
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center;     /* Center vertically */
+      }
+</style>
+<div class="container">
     <div class="menu">
-        <button onclick="displaySection('customers')">Customers</button>
-        <button onclick="displaySection('forecasting')">Forecasting</button>
-        <button onclick="displaySection('order')">Orders</button>
-        <button onclick="displaySection('all')">All</button>
-    </div>
+      <button onclick="displaySection('customers')">Customers</button>
+      <button onclick="displaySection('forecasting')">Forecasting</button>
+      <button onclick="displaySection('order')">Orders</button>
+      <button onclick="displaySection('all')">All</button>
+  </div>
 
-    <div id="customers" class="section">
-        <button onclick="myFunction('customers')">Download Customers</button>
-    </div>
+  <div id="customers" class="section">
+      <button onclick="myFunction('customers')">Download Customers</button>
+  </div>
 
-    <div id="forecasting" class="section">
+  <div id="forecasting" class="section">
+    <div class="center-container">
+      <div class="date-range">
+        <label for="from">From : </label>
         <input type="date" placeholder="Enter from date" name="from" id="from_forecasting">
+        <label for="to">To : </label>
         <input type="date" placeholder="Enter to date" name="to" id="to_forecasting">
-        <button onclick="myFunction('forecasting')">Download Forecasting</button>
+      </div>
     </div>
+      <button onclick="myFunction('forecasting')">Download Forecasting</button>
+  </div>
 
-    <div id="order" class="section">
+  <div id="order" class="section">
+    <div class="center-container">
+      <div class="date-range">
+        <label for="from">From : </label>
         <input type="date" placeholder="Enter from date" name="from" id="from_order">
+        <label for="to">To : </label>
         <input type="date" placeholder="Enter to date" name="to" id="to_order">
-        <button onclick="myFunction('order')">Download Order</button>
+      </div>
     </div>
+      <button onclick="myFunction('order')">Download Order</button>
+  </div>
 
-    <div id="all" class="section">
-      <input type="date" placeholder="Enter from date" name="from" id="from_all">
-      <input type="date" placeholder="Enter to date" name="to" id="to_all">
-      <!-- <button onclick="myFunction('all')">Download General Report</button> -->
-      <button onclick="myFunction('all')">Download</button>
+  <div id="all" class="section">
+    <div class="center-container">
+      <div class="date-range">
+        <label for="from">From : </label>
+        <input type="date" placeholder="Enter from date" name="from" id="from_all">
+        <label for="to">To : </label>
+        <input type="date" placeholder="Enter to date" name="to" id="to_all">
+      </div>
     </div>
+    
+    <button onclick="myFunction('all')">Download General</button>
+  </div>
+</div>
+    
 {% endblock %}
 
 

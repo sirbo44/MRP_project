@@ -1,5 +1,66 @@
 {% extends './partials/base.html'%}
 {% block content %}
+<style>
+    .container {
+        margin-top:5rem;
+        position: relative;
+        min-width: 300px;
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 60px 10px 10px; /* top padding leaves space for fixed title */
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        background-color: #f9f9f9;
+    }
+
+    .container h2 {
+      position: absolute;
+      top: 10px;
+      margin-left:13rem;
+      font-size: 2rem;
+      color:#4682B4;
+    }
+
+    .container table {
+      flex: 1 1 100px;
+      background: #e3e3e3;
+      padding: 10px;
+      text-align: center;
+    }
+
+    form{
+        margin-left: 14rem;
+    }
+
+    #cancel-button{
+        color: white;
+        margin-left:1rem;
+        background-color: #FF4C4C;
+        border: 0.5rem solid #FF4C4C;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 80%;
+      margin-bottom: 2rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px 15px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+</style>
+<div class="container">
     <h2>Order #{{order.id}}</h2>
     <table>
         <tr>
@@ -22,6 +83,11 @@
             {% endfor %}
         </tr>
     </table>
+    <form action="archive" method="get">
+        {% csrf_token %}
+        <button id="cancel-button">Cancel</button>
+</div>
+    
 {% endblock %}
 
 

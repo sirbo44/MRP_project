@@ -1,7 +1,40 @@
 {% extends './partials/base.html'%}
 {% block content  %}
-<form method="POST">
+<style>
+  .container {
+    margin-top:5rem;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    background-color: #F8F9FA;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  form h2{
+    color: #0B1E3D;
+    margin-bottom: 2rem;
+  }
+  .cancel-button{
+        background-color: #FF6B35;
+        margin-left: 2rem;
+        color: white;
+        border: 0.5rem solid #FF6B35;
+  }
+  .add-button{
+        background-color: #4682B4;
+        color: white;
+        border: 0.5rem solid #4682B4;
+  }
+  .add-button, .cancel-button{
+        margin-top:2rem;
+        font-size: 1.2rem;
+    }
+</style>
+<div class="container">
+  <form method="POST">
     {% csrf_token %}
+    <h2>Edit Customer</h2>
     <label for="brand">Brand:</label>
     <input type="text" id="brand" name="brand" value="{{ customer.brand }}"><br><br>
   
@@ -11,8 +44,11 @@
     <label for="phone">Phone:</label>
     <input type="text" id="phone" name="phone" value="{{ customer.phone }}" ><br><br>
 
-    <button type="submit">Update</button>
-  </form>
+    <button type="submit" class="add-button">Update</button>
+    <button formaction="/customers" formmethod="GET" class="cancel-button" id="cancel">Cancel</button>
+</form>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

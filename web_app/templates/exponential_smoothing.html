@@ -1,20 +1,47 @@
 {% extends './partials/base.html'%}
 {% block content %} 
 {{ data|json_script:'data' }}
+<style>
+    h2{
+        color: #0B1E3D;
+        margin-left: 55rem;
+        margin-top:5rem;
+        margin-bottom:2rem;
+    }
+    label{
+        margin-top:2rem;
+        margin-left:45rem;
+    }
+    #scatter_chart{
+        margin-top:1rem;
+        margin-left:35rem;
+        width: 50rem;
+        height:31rem;
+    }
+    .selected{
+        border-radius: 5rem;
+        background: none;
+        border: none;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Just the shadow */
+        transform: scale(1.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+</style>
+<h2>Forecasting</h2>
 <ul class="nav justify-content-center">
     <li class="nav-item">
         <a class="nav-link" href="/forecasting/linear_regression">Linear Regression</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="/forecasting/exponential_smoothing">Exponential Smoothing</a>
+        <a class="nav-link selected" href="/forecasting/exponential_smoothing">Exponential Smoothing</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="/forecasting/moving_average">Moving Average</a>
     </li>
 </ul>
-<input type="number" placeholder="1" id="periods" disabled>
 <label for="periods">Enter the number of periods for forecasting</label>
-<div id="scatter_chart" style="width: 800px; height: 500px;"></div>
+<input type="number" placeholder="1" id="periods" disabled>
+<div id="scatter_chart" ></div>
 {% endblock %}
 
 

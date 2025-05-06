@@ -121,7 +121,13 @@ def archive(request):                                                           
         return render(request, "archive.html", context)
 
 def schedule(request):                                                                                  # DONE
-    context = {"page": "schedule"}
+    orderID = request.GET.get('order')
+    order = Archive.objects.filter(id = orderID).values()[0]
+    data = order['schedule']
+    data = data[1:-1]
+    data = data.split(',')        
+    print(order)                                                                        
+    context = {"page": "schedule", "data": data, 'range': range(len(data)+1), 'order':order}
     return render(request, "schedule.html", context)
 
 # ---------------------------------FORECASTING PAGES ---------------------------------------------
@@ -148,7 +154,7 @@ def exponential_smoothing(request):                                             
         else:
             date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
     print(date_val)
-    context = {"page" : "exponential smoothing", "orders": orders, 'data':date_val}
+    context = {"page" : "forecasting", "orders": orders, 'data':date_val}
     return render(request, "exponential_smoothing.html", context)
 
 
@@ -162,7 +168,7 @@ def moving_average(request):                                                    
         else:
             date_val[str(orders[i].date).split('-')[0]+'-'+str(orders[i].date).split('-')[1]] = int(sum(list(map(int,orders[i].schedule[1:-1].split(',')))))
     print(date_val)
-    context = {"page" : "moving average", "orders": orders, 'data':date_val}
+    context = {"page" : "forecasting", "orders": orders, 'data':date_val}
     return render(request, "moving_average.html", context)
 
 # ----------------------------------REPORT PAGES --------------------------------------------
@@ -198,26 +204,26 @@ def edit(request):                                                              
 
 ADD LOGO + BRAND TO THE EXPORTABLES
 
-track_order
+track_order         ΟΚ
     1. place in the center
     2. borders
     3. in a container
     4. monitor in the container
     5. button steel blue and white letters border as estimation period steel blue
 
-monitor
+monitor             ΟΚ
     1. in a container
     2. archive steel blue white letters + borders
     3. cancel danger red white letters + borders
     4. order +id navy in the container
 
-archive 
+archive             OK
     1. display vertically
     2. container in the center 
     4. Archive title navy on top in the container
     3. each line to be a link for monitor?
 
-forecasting(S)
+forecasting(S)      OK
     1. shadows below links 
     2. darker shadow on selected link
     3. zoomed letters of selected link
@@ -225,13 +231,13 @@ forecasting(S)
     5. switch the field with label
     6. center the graph and the label+field
 
-customers
+customers           OK  
     1. container in the center 
     2. title in navy "Customers"
     3. table with borders 
     4. make whole line edit button
 
-edit
+edit                OK
     1. container in the center
     2. title "edit customer" navy
     3. update = steel blue + borders white letters

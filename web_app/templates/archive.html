@@ -1,21 +1,26 @@
 {% extends './partials/base.html'%}
 
 {% block content %} 
-    <table>
-        <tr>
-            <th>TIN</th>
-            <th>Date of Order</th>
-        </tr>
-        {% for order in orders %}       <!-- TRY IMPLEMENTATION WITH DIVS AS TABLE 
-                                                SOURCE MR. MAVROS' ENTERPRISE SYSTEM DEVELOPMENT IN GITHUB 
-                                                FILE target/classes/templates/homePage.html -->
-        <a href="/schedule?order={{order.id}}">
-            <td>{{ order.customer }}</td>
-            <td>{{ order.date }}</td>
-            <td>{{ order.id }}</td>
+<style>
+    a{
+        text-decoration: none;
+    }
+</style>
+
+    <div class="container  border border-dark col-11">
+        <div class="d-flex col-11 flex-fill">
+            <div class="col-3 py-2 flex-fill text-center">TIN</div>
+            <div class="col-3 py-2 flex-fill text-center">Date of Order</div>
+            <div class="col-3 py-2 flex-fill text-center">ID</div>
+        </div>
+        {% for order in orders %}
+        <a class="clickable col-11 d-flex flex-fill border line" href="/schedule?order={{order.id}}">
+            <div class="col-3 py-2 flex-fill text-center">{{ order.customer }}</div>
+            <div class="col-3 py-2 flex-fill text-center">{{ order.date }}</div>
+            <div class="col-3 py-2 flex-fill text-center">{{ order.id }}</div>
         </a>
         {% endfor %}
-    </table>
+    </div>
 {% endblock %}
 
 

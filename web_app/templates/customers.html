@@ -1,21 +1,35 @@
 {% extends './partials/base.html'%}
 {% block content  %}
-<table>
-    <tr>
-        <th>Brand</th>
-        <th>TIN</th>
-        <th>Phone</th>
-    </tr>
+<style>
+    a{
+        text-decoration: none;
+    }
+    .container {
+        margin-top:5rem;
+        text-align: center;
+        width: 50rem;
+        background-color: #F8F9FA;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+</style>
+<div class="container border border-dark col-11">
+    <div class="d-flex col-11 flex-fill">
+        <div class="col-3 py-2 flex-fill text-center">Brand</div>
+        <div class="col-3 py-2 flex-fill text-center">TIN</div>
+        <div class="col-3 py-2 flex-fill text-center">Phone</div>
+    </div>
     {% for customer in customers %}
-    <tr>
-        <td>{{customer.brand}}</td>
-        <td>{{customer.tin}}</td>
-        <td>{{customer.phone}}</td>
-        <td><a href="/edit?tin={{customer.tin}}">Edit</a></td>
-    </tr>
+    <a class="clickable col-11 d-flex flex-fill border line" href="/edit?tin={{customer.tin}}">
+        <div class="col-3 py-2 flex-fill text-center">{{customer.brand}}</div>
+        <div class="col-3 py-2 flex-fill text-center">{{customer.tin}}</div>
+        <div class="col-3 py-2 flex-fill text-center">{{customer.phone}}</div>
+    </a>
     {% endfor %}
-</table>
-<p>{{ customers.brand }}</p>
+</div>
+
+
 {% endblock %}
 
 {% block scripts %}
