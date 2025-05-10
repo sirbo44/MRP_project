@@ -89,7 +89,7 @@
         {% csrf_token %}
         <input type="hidden" name="order" id="order" value='{{order.id}}'>        
         <button id="archive">Archive</button>
-        <button formaction="track_order" formmethod="get" id="cancel-button">Cancel</button>
+        <button formaction="track_order" formmethod="post" id="cancel-button">Cancel</button>
     </form>
 </div>
     

@@ -1,10 +1,14 @@
 from django.urls import path, re_path
+from django.contrib.auth import views as auth_views
+from .views import unauthorized_view
+
 
 from . import views
 
 urlpatterns = [
     path("", views.to_login, name="to_login"),
-    path("login", views.login, name="login"),
+    path("login", views.custom_login_view, name="login"),
+    path('logout', auth_views.LoginView.as_view(), name='logout'),
     path("home", views.home, name="home"),
     path("estimation_period", views.estimation_period, name="estimation_period"),
     path("track_order", views.track_order, name="track_order"),
@@ -20,6 +24,7 @@ urlpatterns = [
     path("forecasting/linear_regression", views.linear_regression, name="linear_regression"),
     path("forecasting/moving_average", views.moving_average, name="moving_average"),
     path("edit/", views.edit, name="edit"),
-    # path("", views., name=""),
+    path('logout/', views.custom_logout, name='logout'),
+    path('unauthorized/', unauthorized_view, name='unauthorized'),
     # path("", views., name=""),
 ]

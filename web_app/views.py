@@ -3,6 +3,12 @@ from django.template import loader
 from django.shortcuts import render, redirect
 from .models import User, Order, Customer, Archive
 import json
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+
 
 
 # --------------------------REDIRECT TO LOGIN ----------------------------------------------------
@@ -10,39 +16,39 @@ import json
 def to_login(request):                                                                                  # DONE
     return redirect('login')
 
-# ---------------------------LOGIN PAGE ---------------------------------------------------
-def login(request):                                                                                     # DONE 
-    # on POST requests
+def custom_login_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('unauthorized')  # your error page view name
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def custom_login_view(request):                                                                         # DONE
+    form = AuthenticationForm(request, data=request.POST or None)
+    show_errors = False
+
     if request.method == 'POST':
-        # get the username and the password from the user
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        # get all the user records from the server
-        users = User.objects.all().values()
-        # check the username's validity 
-        for user in users:
-            # if username is correct
-            if user['username'] == username:
-                # if password is correct
-                if user['password'] == password:
-                    # send user to the correct homepage
-                    # if user['role'] == 'user':            LATER WHEN ADD ADMIN PAGE   
-                    return redirect('home')
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('home')  # replace 'home' with your actual home page route name
         else:
-            # return error message and render to login
-            return render(request, "login.html", {'message':'Wrong credentials! Please try again'})
-    return render(request, "login.html")
+            show_errors = True  # only show errors if login attempt failed
+
+    return render(request, 'registration/login.html', {'form': form, 'show_errors': show_errors})
 
 # ---------------------------HOME PAGE ---------------------------------------------------
+@custom_login_required
 def home(request):                                                                                      # DONE
     context = {"page" : "home"}
     return render(request, "home.html", context)
 
 # ----------------------------ESTIMATION PAGES --------------------------------------------------
+@custom_login_required
 def estimation_period(request):                                                                         # DONE
     context = {"page" : "estimation period"}
     return render(request, "estimation_period.html", context)
 
+@custom_login_required
 def estimate(request):                                                                                  # DONE
     # on POST request
     numbers = request.GET.getlist('input')
@@ -54,7 +60,7 @@ def estimate(request):                                                          
     return redirect('estimation_schedule/?data=['+values+']')
 
 path = ''
-
+@custom_login_required
 def estimation_schedule(request):                                                                       # DONE
     if request.method == 'GET':
         # access global variable path
@@ -89,12 +95,13 @@ def estimation_schedule(request):                                               
       
 
 # -------------------------------TRACK ORDERS PAGES -----------------------------------------------
+@custom_login_required
 def track_order(request):                                                                               # DONE
     orders = Order.objects.all().values()
     context = {"page" : "track order", 'orders':orders}
     return render(request, "track_order.html", context)
 
-
+@custom_login_required
 def monitor(request):                                                                                   # DONE
     orderID = request.GET.get('order')
     order = Order.objects.filter(id = orderID).values()[0]
@@ -104,9 +111,13 @@ def monitor(request):                                                           
     context = {"page": "monitor", "data": data, 'range': range(len(data)+1), 'order':order}
     return render(request, "monitor.html", context)
 
+@custom_login_required
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
 
 # --------------------------------ARCHIVE PAGES ----------------------------------------------
-
+@custom_login_required
 def archive(request):                                                                                   # DONE
     if request.method == 'POST':
         orderid = int(request.POST.get('order'))
@@ -120,6 +131,7 @@ def archive(request):                                                           
         context = {"page" : "archive", 'orders':orders}
         return render(request, "archive.html", context)
 
+@custom_login_required
 def schedule(request):                                                                                  # DONE
     orderID = request.GET.get('order')
     order = Archive.objects.filter(id = orderID).values()[0]
@@ -131,7 +143,7 @@ def schedule(request):                                                          
     return render(request, "schedule.html", context)
 
 # ---------------------------------FORECASTING PAGES ---------------------------------------------
-
+@custom_login_required
 def linear_regression(request):                                                                         # DONE
     orders = Archive.objects.all()
     date_val = {}
@@ -144,7 +156,7 @@ def linear_regression(request):                                                 
     context = {"page" : "forecasting", "orders": orders, 'data':date_val}
     return render(request, "linear_regression.html", context)
 
-
+@custom_login_required
 def exponential_smoothing(request):                                                                     # DONE
     orders = Archive.objects.all()
     date_val = {}
@@ -157,7 +169,7 @@ def exponential_smoothing(request):                                             
     context = {"page" : "forecasting", "orders": orders, 'data':date_val}
     return render(request, "exponential_smoothing.html", context)
 
-
+@custom_login_required
 def moving_average(request):                                                                            # DONE
     # We get all the archived records from the database in order to perform predictions
     orders = Archive.objects.all()
@@ -172,6 +184,7 @@ def moving_average(request):                                                    
     return render(request, "moving_average.html", context)
 
 # ----------------------------------REPORT PAGES --------------------------------------------
+@custom_login_required
 def report(request): 
     customers = Customer.objects.all().values()
     orders = Order.objects.all().values()
@@ -180,11 +193,13 @@ def report(request):
     return render(request, "report.html", context)
 
 # ----------------------------------CUSTOMERS --------------------------------------------
+@custom_login_required
 def customers(request):                                                                                 # DONE
     customers = Customer.objects.all()
     context = {"page": "customers", "customers":customers}
     return render(request, "customers.html", context)
 
+@custom_login_required
 def edit(request):                                                                                      # DONE
     tin = request.GET.get('tin')
     customer = Customer.objects.get(tin=tin)
@@ -196,6 +211,9 @@ def edit(request):                                                              
     context = {"page":"edit page", "customer":customer}
     return render(request, "edit.html", context)
 
+# ----------------------------------UNAUTHORIZED --------------------------------------------
+def unauthorized_view(request):
+    return render(request, 'unauthorized.html')
 
 
 
