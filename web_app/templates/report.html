@@ -3,6 +3,8 @@
 {{ customers|json_script:"customers-data" }}
 {{ orders|json_script:'orders-data' }}
 {{ archive|json_script:'archive-data' }}
+{{ data|json_script:'data' }}
+
 <style>
     .menu {
       margin-bottom: 20px;
@@ -38,10 +40,9 @@
         gap: 10px;
       }
       .center-container {
-        /* height: 100vh; Full screen height */
         display: flex;
-        justify-content: center; /* Center horizontally */
-        align-items: center;     /* Center vertically */
+        justify-content: center; 
+        align-items: center;     
       }
       .section button{
         margin-top:1rem;
@@ -67,14 +68,6 @@
   </div>
 
   <div id="forecasting" class="section">
-    <div class="center-container">
-      <div class="date-range">
-        <label for="from">From : </label>
-        <input type="date" placeholder="Enter from date" name="from" id="from_forecasting">
-        <label for="to">To : </label>
-        <input type="date" placeholder="Enter to date" name="to" id="to_forecasting">
-      </div>
-    </div>
       <button onclick="myFunction('forecasting')">Download Forecasting</button>
   </div>
 
@@ -102,8 +95,10 @@
     
     <button onclick="myFunction('all')">Download General</button>
   </div>
-  
-  <div class="chart_div" style="width: 800px; height: 400px;"></div>
+  <input  hidden value="{{ orders_forecast}}" id="orders_forecast">
+  <canvas hidden id="regression_chart" width="1000" height="500"></canvas>
+  <canvas hidden id="movingAverage_chart" width="800" height="400"></canvas>  
+  <canvas hidden id="exponentialSmoothing_chart" width="800" height="400"></canvas>
 </div>
 
     
@@ -116,6 +111,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
 <script>
     
     function displaySection(id) {
@@ -123,7 +124,6 @@
       sections.forEach(section => section.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
-    console.log();
 
     async function myFunction(section){
       const { jsPDF } = window.jspdf;
@@ -138,7 +138,7 @@
       doc.text("PyTrack Inc.", 170, 25, { align: "right" });
       doc.setFontSize(10);
       doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
-      let y = 50;
+      let y = 46;
       doc.setFontSize(12);
       switch (section){
         case 'customers':
@@ -153,15 +153,18 @@
             styles: { fontSize: 10 },
             didDrawPage: function (data) {
               if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
                 doc.setFontSize(14);
-                doc.text("Your Company Name", 150, 15, { align: "right" });
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
                 doc.setFontSize(10);
-                doc.text("Date: " + getCurrentDateFormatted(), 150, 22, { align: "right" });
-                doc.rect(10, 10, 30, 20);
-                doc.text("LOGO", 15, 22);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                let y = 46;
+                doc.setFontSize(12);
               }
             }
           });
+          doc.save("company_report.pdf");
           break;
         case 'order':
           doc.text("Orders", 14, y);
@@ -193,17 +196,401 @@
               }
             }
           });
+          doc.save("company_report.pdf");
           break;
         case 'forecasting':
           doc.text("Forecasting", 14, y);
-          y += 4;
-          // remove the dated from and to 
-          // make charts as in the forecasting pages
-          // store them in png files
-          // add them in the pdf
+          y += 3;
+          var data = JSON.parse(document.getElementById('data').textContent);
+          google.charts.load('current', { packages: ['corechart'] });
+          google.charts.setOnLoadCallback(drawAll);
+          function linear_regression(data, per_num = 3) {
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            const x = [...Array(values.length).keys()];
+            const y = values;
+            const n = x.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const futureX = [];
+            const futureY = [];
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            for (let i = 1; i <= per_num; i++) {
+              const futureIndex = x.length + i - 1;
+              const predValue = slope * futureIndex + intercept;
+              futureY.push(predValue);
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              futureX.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const labels = [...months, ...futureX];
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = futureX.map((m, i) => ({ x: m, y: futureY[i] }));
+            const bridgeData = [
+              { x: months[months.length - 1], y: values[values.length - 1] },
+              { x: futureX[0], y: futureY[0] }
+            ];
+            const ctx = document.getElementById('regression_chart').getContext('2d');
+            Chart.register({
+              id: 'custom_canvas_background_color',
+              beforeDraw: (chart, args, options) => {
+                const { ctx } = chart;
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = options.color || 'white';
+                ctx.fillRect(0, 0, chart.width, chart.height);
+                ctx.restore();
+              }
+            });
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Actual Data',
+                    data: actualData,
+                    borderColor: '#4285F4',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                  },
+                  {
+                    label: 'Forecast',
+                    data: forecastData,
+                    borderColor: '#28a745',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                  },
+                  {
+                    label: 'Bridge',
+                    data: bridgeData,
+                    borderColor: '#28a745',
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true,
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function(item) {
+                        return item.text !== 'Bridge';
+                      }
+                    },
+                    position: 'right',
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        if (context.dataset.label === 'Bridge') return null;
+                        return context.dataset.label + ': ' + context.formattedValue;
+                      }
+                    },
+                    mode: 'index',
+                    intersect: false,
+                  },
+                  custom_canvas_background_color: {
+                    color: 'white' // Set background color here
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Month',
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Value',
+                    }
+                  }
+                }
+              }
+            });
+          }
+
+          function moving_average(data, per_num = 3) {
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            const extraMonths = [];
+            for (let i = 1; i <= per_num; i++) {
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              extraMonths.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const extraValues = [];
+            for (let i = 1; i <= per_num; i++) {
+              const tempList = values.concat(extraValues);
+              const newValue =
+                (tempList.at(-1) + tempList.at(-2) + tempList.at(-3)) / per_num;
+              extraValues.push(newValue);
+            }
+
+            const labels = [...months, ...extraMonths];
+
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = extraMonths.map((m, i) => ({ x: m, y: extraValues[i] }));
+
+            const bridgeData = [
+              { x: months[months.length - 1], y: values[values.length - 1] },
+              { x: extraMonths[0], y: extraValues[0] }
+            ];
+
+            // Create chart
+            const ctx = document.getElementById('movingAverage_chart').getContext('2d');
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Actual Data',
+                    data: actualData,
+                    borderColor: '#4285F4',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: 'Forecast',
+                    data: forecastData,
+                    borderColor: '#FF5733',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: 'Bridge',
+                    data: bridgeData,
+                    borderColor: '#FF5733',
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function(item) {
+                        return item.text !== 'Bridge';
+                      }
+                    },
+                    position: 'right'
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        if (context.dataset.label === 'Bridge') return null;
+                        return context.dataset.label + ': ' + context.formattedValue;
+                      }
+                    },
+                    mode: 'index',
+                    intersect: false
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Month'
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Value'
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          function exponential_smoothing(data, per_num = 1) {
+            const alpha = 0.7; // Smoothing factor
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            const smoothed = [values[0]];
+            for (let i = 1; i < values.length; i++) {
+              smoothed.push(alpha * values[i] + (1 - alpha) * smoothed[i - 1]);
+            }
+            const extraMonths = [];
+            const extraValues = [];
+            let lastForecast = smoothed[smoothed.length - 1];
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            for (let i = 1; i <= per_num; i++) {
+              extraValues.push(lastForecast);
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              extraMonths.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const labels = [...months, ...extraMonths];
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = extraMonths.map((m, i) => ({ x: m, y: extraValues[i] }));
+            const bridgeData = [
+              { x: months[months.length - 1], y: smoothed[smoothed.length - 1] },
+              { x: extraMonths[0], y: extraValues[0] }
+            ];
+            const ctx = document.getElementById("exponentialSmoothing_chart").getContext("2d");
+            new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: "Actual Data",
+                    data: actualData,
+                    borderColor: "#4285F4",
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: "Forecast",
+                    data: forecastData,
+                    borderColor: "#FF9800",
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: "Bridge",
+                    data: bridgeData,
+                    borderColor: "#FF9800",
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function (item) {
+                        return item.text !== "Bridge";
+                      }
+                    },
+                    position: "right"
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        if (context.dataset.label === "Bridge") return null;
+                        return `${context.dataset.label}: ${context.formattedValue}`;
+                      }
+                    },
+                    mode: "index",
+                    intersect: false
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: "Month"
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: "Value"
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          function drawAll() {
+            linear_regression(data, 3);
+            moving_average(data, 3);
+            exponential_smoothing(data, 1);
+            setTimeout(() => {
+              var canvas = document.getElementById("regression_chart");
+              y += 2
+              doc.text("Linear Regression", 80, y)
+              y += 2;
+              doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+              y += 84;
+              doc.text("Moving Average", 80, y)
+              y += 2;
+              canvas = document.getElementById("movingAverage_chart");
+              doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+              y += 82;
+              doc.text("Exponential Smoothing", 80, y)
+              y += 2;
+              canvas = document.getElementById("exponentialSmoothing_chart");
+              doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+              doc.save("company_report.pdf");
+            }, 500);
+          }
+          
           break;
         case 'all':
-          // orders 
+        doc.text("Customers", 14, y);
+          y += 4;
+          doc.autoTable({
+            head: [['Brand', 'TIN', 'Phone']],
+            body: cmers.map(c => [c.brand, c.tin, c.phone]),
+            y: y,
+            theme: 'striped',
+            margin: { top: y },
+            styles: { fontSize: 10 },
+            didDrawPage: function (data) {
+              if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
+                doc.setFontSize(14);
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                let y = 46;
+                doc.setFontSize(12);
+              }
+            }
+          });
+          y += 10.5*cmers.length;
           doc.text("Orders", 14, y);
           y += 4;
           from_date = document.getElementById('from_all').value;
@@ -224,26 +611,453 @@
             styles: { fontSize: 10 },
             didDrawPage: function (data) {
               if (data.pageCount > 1 && data.pageCount > doc.getNumberOfPages() - 1) {
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
                 doc.setFontSize(14);
-                doc.text("Your Company Name", 150, 15, { align: "right" });
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
                 doc.setFontSize(10);
-                doc.text("Date: " + getCurrentDateFormatted(), 150, 22, { align: "right" });
-                doc.rect(10, 10, 30, 20);
-                doc.text("LOGO", 15, 22);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                let y = 46;
+                doc.setFontSize(12);
               }
             }
           });
-          y += final_orders.length*9;
-          doc.text("Customers", 14, y);
-          doc.autoTable({
-            head: [['Brand', 'TIN', 'Phone']],
-            body: cmers.map(c => [c.brand, c.tin, c.phone]),
-            y: y,
-            theme: 'striped'
-          });
+          y += 12*final_orders.length;
+          doc.text("Forecasting", 14, y);
+          y += 3;
+          var data = JSON.parse(document.getElementById('data').textContent);
+          google.charts.load('current', { packages: ['corechart'] });
+          google.charts.setOnLoadCallback(drawAll(y));
+          function linear_regression(data, per_num = 3) {
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            const x = [...Array(values.length).keys()];
+            const y = values;
+            const n = x.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const futureX = [];
+            const futureY = [];
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            for (let i = 1; i <= per_num; i++) {
+              const futureIndex = x.length + i - 1;
+              const predValue = slope * futureIndex + intercept;
+              futureY.push(predValue);
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              futureX.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const labels = [...months, ...futureX];
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = futureX.map((m, i) => ({ x: m, y: futureY[i] }));
+            const bridgeData = [
+              { x: months[months.length - 1], y: values[values.length - 1] },
+              { x: futureX[0], y: futureY[0] }
+            ];
+            const ctx = document.getElementById('regression_chart').getContext('2d');
+            Chart.register({
+              id: 'custom_canvas_background_color',
+              beforeDraw: (chart, args, options) => {
+                const { ctx } = chart;
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = options.color || 'white';
+                ctx.fillRect(0, 0, chart.width, chart.height);
+                ctx.restore();
+              }
+            });
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Actual Data',
+                    data: actualData,
+                    borderColor: '#4285F4',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                  },
+                  {
+                    label: 'Forecast',
+                    data: forecastData,
+                    borderColor: '#28a745',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                  },
+                  {
+                    label: 'Bridge',
+                    data: bridgeData,
+                    borderColor: '#28a745',
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true,
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function(item) {
+                        return item.text !== 'Bridge';
+                      }
+                    },
+                    position: 'right',
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        if (context.dataset.label === 'Bridge') return null;
+                        return context.dataset.label + ': ' + context.formattedValue;
+                      }
+                    },
+                    mode: 'index',
+                    intersect: false,
+                  },
+                  custom_canvas_background_color: {
+                    color: 'white' // Set background color here
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Month',
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Value',
+                    }
+                  }
+                }
+              }
+            });
+          }
+
+          function moving_average(data, per_num = 3) {
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            const extraMonths = [];
+            for (let i = 1; i <= per_num; i++) {
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              extraMonths.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const extraValues = [];
+            for (let i = 1; i <= per_num; i++) {
+              const tempList = values.concat(extraValues);
+              const newValue =
+                (tempList.at(-1) + tempList.at(-2) + tempList.at(-3)) / per_num;
+              extraValues.push(newValue);
+            }
+
+            const labels = [...months, ...extraMonths];
+
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = extraMonths.map((m, i) => ({ x: m, y: extraValues[i] }));
+
+            const bridgeData = [
+              { x: months[months.length - 1], y: values[values.length - 1] },
+              { x: extraMonths[0], y: extraValues[0] }
+            ];
+
+            // Create chart
+            const ctx = document.getElementById('movingAverage_chart').getContext('2d');
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Actual Data',
+                    data: actualData,
+                    borderColor: '#4285F4',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: 'Forecast',
+                    data: forecastData,
+                    borderColor: '#FF5733',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: 'Bridge',
+                    data: bridgeData,
+                    borderColor: '#FF5733',
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function(item) {
+                        return item.text !== 'Bridge';
+                      }
+                    },
+                    position: 'right'
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        if (context.dataset.label === 'Bridge') return null;
+                        return context.dataset.label + ': ' + context.formattedValue;
+                      }
+                    },
+                    mode: 'index',
+                    intersect: false
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Month'
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Value'
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          function exponential_smoothing(data, per_num = 1) {
+            const alpha = 0.7; // Smoothing factor
+            const months = Object.keys(data);
+            const values = Object.values(data);
+            const smoothed = [values[0]];
+            for (let i = 1; i < values.length; i++) {
+              smoothed.push(alpha * values[i] + (1 - alpha) * smoothed[i - 1]);
+            }
+            const extraMonths = [];
+            const extraValues = [];
+            let lastForecast = smoothed[smoothed.length - 1];
+            let lastMonth = parseInt(months[months.length - 1].slice(-2));
+            let lastYear = parseInt(months[months.length - 1].slice(0, -2));
+            for (let i = 1; i <= per_num; i++) {
+              extraValues.push(lastForecast);
+              if (lastMonth < 12) {
+                lastMonth += 1;
+              } else {
+                lastMonth = 1;
+                lastYear += 1;
+              }
+              extraMonths.push(`${lastYear}-${String(lastMonth).padStart(2, '0')}`);
+            }
+            const labels = [...months, ...extraMonths];
+            const actualData = months.map((m, i) => ({ x: m, y: values[i] }));
+            const forecastData = extraMonths.map((m, i) => ({ x: m, y: extraValues[i] }));
+            const bridgeData = [
+              { x: months[months.length - 1], y: smoothed[smoothed.length - 1] },
+              { x: extraMonths[0], y: extraValues[0] }
+            ];
+            const ctx = document.getElementById("exponentialSmoothing_chart").getContext("2d");
+            new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: "Actual Data",
+                    data: actualData,
+                    borderColor: "#4285F4",
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: "Forecast",
+                    data: forecastData,
+                    borderColor: "#FF9800",
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4
+                  },
+                  {
+                    label: "Bridge",
+                    data: bridgeData,
+                    borderColor: "#FF9800",
+                    borderDash: [2, 4],
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    showLine: true
+                  }
+                ]
+              },
+              options: {
+                responsive: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      filter: function (item) {
+                        return item.text !== "Bridge";
+                      }
+                    },
+                    position: "right"
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        if (context.dataset.label === "Bridge") return null;
+                        return `${context.dataset.label}: ${context.formattedValue}`;
+                      }
+                    },
+                    mode: "index",
+                    intersect: false
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: "Month"
+                    }
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: "Value"
+                    }
+                  }
+                }
+              }
+            });
+          }
+          
+          function drawAll(y) {
+            linear_regression(data, 3);
+            moving_average(data, 3);
+            exponential_smoothing(data, 1);
+            setTimeout(() => {
+              const pageHeight= 297;
+              console.log(pageHeight);
+              var canvas = document.getElementById("regression_chart");
+              y += 2
+              console.log("First y "+y);
+              if (y+2+80<pageHeight){
+                doc.text("Linear Regression", 80, y)
+                y += 2;
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y +=80;
+                console.log("Enter same page")
+              } else {
+                doc.addPage();
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
+                doc.setFontSize(14);
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                y = 46;
+                doc.setFontSize(12);
+                doc.text("Linear Regression", 80, y)
+                y += 2;
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y +=80;
+                console.log("Enter different page")
+              }
+              console.log("Second y "+y);
+              if (y+2+80<pageHeight){
+                doc.text("Moving Average", 80, y)
+                y += 2;
+                canvas = document.getElementById("movingAverage_chart");
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y +=80;
+                console.log("Enter same page")
+              } else {
+                doc.addPage();
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
+                doc.setFontSize(14);
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                y = 46;
+                doc.setFontSize(12);
+                doc.text("Moving Average", 80, y)
+                y += 2;
+                canvas = document.getElementById("movingAverage_chart");
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y += 80;
+                console.log("Enter different page Current y "+y)
+              }
+              console.log(y);
+              if (y+2+80<pageHeight) {
+                doc.text("Exponential Smoothing", 80, y)
+                y += 2;
+                canvas = document.getElementById("exponentialSmoothing_chart");
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y +=80;
+                console.log("Enter same page")
+              } else {
+                doc.addPage();
+                doc.setFontSize(12);
+                doc.addImage('/static/images/PyTrack.png',12, -1, 50, 50);
+                doc.setFontSize(14);
+                doc.text("PyTrack Inc.", 170, 25, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Date: " + new Date().toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'}), 170, 32, { align: "right" });
+                y = 46;
+                doc.setFontSize(12);
+                doc.text("Exponential Smoothing", 80, y)
+                y += 2;
+                canvas = document.getElementById("exponentialSmoothing_chart");
+                doc.addImage(canvas.toDataURL('image/jpeg'), 'JPEG' ,30,y,150,75);
+                y +=80;
+                console.log("Enter different page")
+              }
+              
+              
+              doc.save("company_report.pdf");
+            }, 500);
+          }
+          
+          // doc.save("company_report.pdf");
           break;
       }
-      doc.save("company_report.pdf");
+      // doc.save("company_report.pdf");
     };
 
 </script>

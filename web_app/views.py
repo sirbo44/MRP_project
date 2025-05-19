@@ -188,8 +188,15 @@ def moving_average(request):                                                    
 def report(request): 
     customers = Customer.objects.all().values()
     orders = Order.objects.all().values()
-    archive = Archive.objects.all().values()    
-    context = {"page" : "report", "customers": list(customers), "orders": list(orders), "archive": list(archive)}
+    archive = Archive.objects.all().values() 
+    orders_forecast = Archive.objects.all()
+    date_val = {}
+    for i in range(len(orders_forecast)):
+        if (str(orders_forecast[i].date).split('-')[1] in date_val):
+            date_val[str(orders_forecast[i].date).split('-')[0]+'-'+str(orders_forecast[i].date).split('-')[1]] += int(sum(list(map(int,orders_forecast[i].schedule[1:-1].split(',')))))
+        else:
+            date_val[str(orders_forecast[i].date).split('-')[0]+'-'+str(orders_forecast[i].date).split('-')[1]] = int(sum(list(map(int,orders_forecast[i].schedule[1:-1].split(',')))))   
+    context = {"page" : "report", "customers": list(customers), "orders": list(orders), "archive": list(archive), "orders_forecast":orders_forecast, "data":date_val}
     return render(request, "report.html", context)
 
 # ----------------------------------CUSTOMERS --------------------------------------------
