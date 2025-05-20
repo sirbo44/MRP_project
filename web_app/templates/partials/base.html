@@ -20,6 +20,19 @@
       background-color: #DFF6FF;
     }
 
+    .clock{
+      display:flex;
+      justify-content: left;
+      /* margin-top:-3rem; */
+      margin-left:2rem;
+      margin-right:-10rem;
+      font-size: xx-large;
+      background-color: #DFF6FF;
+      color: #003366;
+      text-shadow: 0 0 2px rgba(0, 51, 102, 0.3);
+      letter-spacing: 8px;
+    }
+
     .logo-container img {
       margin-top:-2rem;
       height: 150px;
@@ -70,13 +83,23 @@
     #logout{
       margin-left: 100rem;
     }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+    }
   </style>
 </head>
 <body>
 
   <!-- Logo at top right above navbar -->
-  <div class="logo-container">
-    <img src="/static/images/PyTrack.png" alt="PyTrack Logo" />
+  <div class="header">
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="logo-container">
+      <img src="/static/images/PyTrack.png" alt="PyTrack Logo" />
+    </div>
+    <div class="right-placeholder"></div>
   </div>
 
   <!-- Navigation Bar -->
@@ -120,6 +143,17 @@
 
 </body>
 {% block scripts %} {% endblock %}
+<script>
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </html>
 
