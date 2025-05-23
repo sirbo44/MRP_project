@@ -38,8 +38,13 @@ def custom_login_view(request):                                                 
 
 # ---------------------------HOME PAGE ---------------------------------------------------
 @custom_login_required
-def home(request):                                                                                      # DONE
-    context = {"page" : "home"}
+def home(request):  
+    customers = list(Customer.objects.values_list('tin', flat=True))
+    orders = Order.objects.all()
+    orderCustomers = list(Order.objects.values_list('customer', flat=True))
+    shared = set(customers) & set(orderCustomers)
+
+    context = {"page" : "home", "orders": list(orders), 'data':[int(len(customers)-len(shared)), int(len(shared))]}
     return render(request, "home.html", context)
 
 # ----------------------------ESTIMATION PAGES --------------------------------------------------
@@ -50,45 +55,31 @@ def estimation_period(request):                                                 
 
 @custom_login_required
 def estimate(request):                                                                                  # DONE
-    # on POST request
     numbers = request.GET.getlist('input')
-    # create a string of the values to pass in the URL 
     values = ''
     for number in numbers:
         values+=number+','
-    # pass the values in the URL
     return redirect('estimation_schedule/?data=['+values+']')
 
 path = ''
 @custom_login_required
 def estimation_schedule(request):                                                                       # DONE
     if request.method == 'GET':
-        # access global variable path
         global path
-        # get the values from the URL
         data = request.GET.get('data', [])
-        # remove '[', ']' and the last ',' from the data retrieved from the URL
         data = data[1:-1]
-        # convert the data to a list 
         data = data.split(',')
-        # remove the last empty item
         data = data[:-1]
         context = {"page" : "estimation schedule", "data":data, 'range' :range(len(data)+1)}
-        # modify the global variable path
         path = request.get_full_path()
         return render(request, "estimation_schedule.html", context)
     if request.method == 'POST':
-        # get the parameters from the url
         params = path[path.find("=")+1:]
-        # delete the last ','
         params = params[:-2]+params[-1]
 
-        # in case of new customer 
         if 'phone' in request.POST:
-            # create a customer in the database
             new_customer = Customer(brand=request.POST['brand'], tin=request.POST['tin'], phone=request.POST['phone'])
             new_customer.save()
-        # create the order for
         new_order = Order(customer=request.POST['tin'],date=request.POST['date'],schedule=params)   
         new_order.save()
     return redirect('estimation_period')
@@ -222,10 +213,3 @@ def edit(request):                                                              
 def unauthorized_view(request):
     return render(request, 'unauthorized.html')
 
-
-
-
-'''         NOTES FOR IMPLEMENTATION
-        GOOD TO HAVE 
-    live clock on the top left corner
-'''
