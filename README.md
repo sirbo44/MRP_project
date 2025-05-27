@@ -39,6 +39,6 @@ Welcome to **PyTrack**, a demo **Material Requirements Planning (MRP)** system t
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/MRP_project.git
+   git clone https://github.com/sirbo44/MRP_project
    cd MRP_project
    python manage.py runserver
